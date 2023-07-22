@@ -11,6 +11,8 @@ export async function addProductToCart(productId: string) {
     instead create one only when an item/product is added to it. 
     */
   const cart = (await getCart()) ?? (await createCart());
+
+  /* check if the item is already in the cart before deciding to add it or update it */
   const itemsInCart = cart.items.find((item) => item.productID == productId);
   if (itemsInCart) {
     await prisma.cartItem.update({
@@ -35,4 +37,5 @@ so we can't refresh the page or update the new values/ the UI (e.g cart in the n
 we use the revalidatePath() f(x) to refresh the page
 */
   revalidatePath("/products/[id]"); //it contains the path not the URL
+  revalidatePath("/cart")
 }
