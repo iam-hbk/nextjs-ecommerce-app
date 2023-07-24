@@ -5,6 +5,7 @@ const nextConfig = {
       { hostname: "images.unsplash.com" },
       { hostname: "source.unsplash.com" },
       { hostname: "chat.openai.com" },
+      { hostname: "lh3.googleusercontent.com" },
     ],
   },
   experimental: {
