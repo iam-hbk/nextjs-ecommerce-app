@@ -1,6 +1,8 @@
 import { cookies } from "next/dist/client/components/headers";
 import { prisma } from "./prisma";
 import { Cart, Prisma } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export type CartwithProducts = Prisma.CartGetPayload<{
   include: { items: { include: { product: true } } };
@@ -41,12 +43,23 @@ export async function getCart(): Promise<ShoppingCart | null> {
 }
 
 export async function createCart(): Promise<ShoppingCart> {
-  const newCart = await prisma.cart.create({
-    data: {},
-  });
+  const session = await getServerSession(authOptions);
+  let newCart: Cart;
 
-  //Note: should encrypt the cookie in production
-  cookies().set("localCartId", newCart.id);
+  //the above type `Cart` is the same we get below in `prisma.cart.create()` , which is an unpopulated cart
+  if (session) {
+    newCart = await prisma.cart.create({
+      data: {
+        userId: session.user.id,
+      },
+    });
+  } else {
+    newCart = await prisma.cart.create({
+      data: {},
+    });
+    //Note: should encrypt the cookie in production
+    cookies().set("localCartId", newCart.id);
+  }
 
   return {
     ...newCart,

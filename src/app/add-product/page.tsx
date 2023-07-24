@@ -1,7 +1,9 @@
 import FormSubmitButton from "@/components/Button";
 import { prisma } from "@/lib/db/prisma";
 import { error } from "console";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export const metadata = {
   title: "Add Product - TecHBK",
@@ -9,12 +11,17 @@ export const metadata = {
 
 async function addProduct(formData: FormData) {
   "use server";
-  
+  // protect the server action as well from unauthorized account calls
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect("/api/auth/signin?callbackUrl=/add-product");
+  }
+
   const name = formData.get("name")?.toString();
   const desc = formData.get("description")?.toString();
   const imageUrl = formData.get("imageUrl")?.toString();
   const price = Number(formData.get("price") || 0);
-  
+
   if (!name || !desc || !imageUrl || !price)
     throw Error("Please fill in all the required fields !");
   await prisma.product.create({
@@ -28,7 +35,13 @@ async function addProduct(formData: FormData) {
 
   // redirect("/");
 }
-export default function AddProductPage() {
+export default async function AddProductPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/api/auth/signin?callbackUrl=/add-product");
+  }
+
   return (
     <div>
       <h1 className="mb-3 text-lg font-bold">Add products</h1>
@@ -59,9 +72,7 @@ export default function AddProductPage() {
           type="number"
           className="input-bordered input mb-3 w-full"
         />
-        <FormSubmitButton className="btn-block">
-          Add Product
-        </FormSubmitButton>
+        <FormSubmitButton className="btn-block">Add Product</FormSubmitButton>
       </form>
     </div>
   );
