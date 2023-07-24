@@ -117,14 +117,21 @@ export async function mergeAnonymousCartIntoUserCart(userId: string) {
         where: { cartID: userCart.id },
       });
 
-      // creating a new cart with the following items, keeping the old IDs !
+      // creating a new cart with the following items, keeping the old IDs ! meaning UPDATING
       //VERY IMPORTANT
-      await tx.cartItem.createMany({
-        data: mergedCartItems.map((item) => ({
-          cartID: userCart.id, //the anonymous cart didn't have an ID (since it was local) now it take the id of the cart from the DB
-          productID: item.productID,
-          quantity: item.quantity,
-        })),
+
+      await tx.cart.update({
+        where: { id: userCart.id },
+        data: {
+          items: {
+            createMany: {
+              data: mergedCartItems.map((item) => ({
+                productID: item.productID,
+                quantity: item.quantity,
+              })),
+            },
+          },
+        },
       });
     } else {
       // migrating that local cart to the DB (because now there's a user logged in)

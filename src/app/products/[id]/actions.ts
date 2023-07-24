@@ -15,20 +15,30 @@ export async function addProductToCart(productId: string) {
   /* check if the item is already in the cart before deciding to add it or update it */
   const itemsInCart = cart.items.find((item) => item.productID == productId);
   if (itemsInCart) {
-    await prisma.cartItem.update({
-      where: {
-        id: itemsInCart.id,
-      },
+    await prisma.cart.update({
+      where: { id: cart.id },
       data: {
-        quantity: { increment: 1 },
+        items: {
+          update: {
+            where: { id: itemsInCart.id },
+            data: {
+              quantity: { increment: 1 },
+            },
+          },
+        },
       },
     });
+    
   } else {
-    await prisma.cartItem.create({
+    await prisma.cart.update({
+      where: { id: cart.id },
       data: {
-        cartID: cart.id,
-        productID: productId,
-        quantity: 1,
+        items: {
+          create: {
+            productID: productId,
+            quantity: 1,
+          },
+        },
       },
     });
   }
@@ -37,5 +47,5 @@ so we can't refresh the page or update the new values/ the UI (e.g cart in the n
 we use the revalidatePath() f(x) to refresh the page
 */
   revalidatePath("/products/[id]"); //it contains the path not the URL
-  revalidatePath("/cart")
+  revalidatePath("/cart");
 }
