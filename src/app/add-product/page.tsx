@@ -20,10 +20,12 @@ async function addProduct(formData: FormData) {
   const name = formData.get("name")?.toString();
   const desc = formData.get("description")?.toString();
   const imageUrl = formData.get("imageUrl")?.toString();
+
   const price = Number(formData.get("price") || 0);
 
   if (!name || !desc || !imageUrl || !price)
     throw Error("Please fill in all the required fields !");
+
   await prisma.product.create({
     data: {
       name,
@@ -33,7 +35,7 @@ async function addProduct(formData: FormData) {
     },
   });
 
-  // redirect("/");
+  redirect("/");
 }
 export default async function AddProductPage() {
   const session = await getServerSession(authOptions);
