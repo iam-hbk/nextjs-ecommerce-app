@@ -29,7 +29,7 @@ export default async function Navbar() {
   const session = await getServerSession(authOptions);
   const cart = await getCart();
   return (
-    <div className="bg-base-100 shadow-lg">
+    <div className="sticky top-0 z-50 bg-base-100 shadow-lg">
       <div className="navbar m-auto max-w-7xl flex-col gap-2 sm:flex-row">
         <div className="flex-1">
           <Link
